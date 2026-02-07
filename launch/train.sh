@@ -23,7 +23,7 @@ accelerate launch \
   --num_machines 1 \
   --machine_rank 0 \
   --num_processes 8 \
-  /scripts/main.py \
+  ./scripts/main.py \
   --pretrained_model_name_or_path=$MODEL_NAME \
   --pretrained_vae_model_name_or_path=$VAE \
   --dataset_name=${DATASET}/metadata.jsonl \
@@ -31,7 +31,7 @@ accelerate launch \
   --train_batch_size=4 \
   --dataloader_num_workers=16 \
   --gradient_accumulation_steps=64 \
-  --max_train_steps=600 \
+  --max_train_steps=2000 \
   --lr_scheduler="constant_with_warmup" --lr_warmup_steps=200 \
   --learning_rate=8.192e-9 --scale_lr \
   --checkpointing_steps 200 \

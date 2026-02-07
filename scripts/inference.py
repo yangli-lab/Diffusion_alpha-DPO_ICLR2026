@@ -80,25 +80,25 @@ if __name__ == "__main__":
             pipe.unet = UNet2DConditionModel.from_pretrained(unet_id, subfolder="unet", torch_dtype=torch.float16)
             pipe = pipe.to("cuda")
         output_base_dir = None
-            for li, line in enumerate(lines):
-                if li % world_size != rank:
-                    continue
-                    
-                prompt = line
-                # prompt = "" # uncondition
-                generator=torch.Generator(device='cuda').manual_seed(42)
-                images = pipe(
-                    prompt=prompt,
-                    generator=generator,
-                    guidance_scale=5,
-                    output_type='pil',
-                    num_images_per_prompt=4,
-                    num_inference_steps=50,
-                ).images
-                grid_image = make_image_grid(images, 2,2)
-                output_dir = os.path.join(output_base_dir, str(li).zfill(5))
-                os.makedirs(output_dir, exist_ok=True)
-                for ii, image in enumerate(images):
-                    os.makedirs(os.path.join(output_dir, 'samples'), exist_ok=True)
-                    image.save(os.path.join(output_dir, 'samples', f"{str(ii).zfill(4)}.png"))
-                grid_image.save(os.path.join(output_dir,  'grid.png'))
+        for li, line in enumerate(lines):
+            if li % world_size != rank:
+                continue
+                
+            prompt = line
+            # prompt = "" # uncondition
+            generator=torch.Generator(device='cuda').manual_seed(42)
+            images = pipe(
+                prompt=prompt,
+                generator=generator,
+                guidance_scale=5,
+                output_type='pil',
+                num_images_per_prompt=4,
+                num_inference_steps=50,
+            ).images
+            grid_image = make_image_grid(images, 2,2)
+            output_dir = os.path.join(output_base_dir, str(li).zfill(5))
+            os.makedirs(output_dir, exist_ok=True)
+            for ii, image in enumerate(images):
+                os.makedirs(os.path.join(output_dir, 'samples'), exist_ok=True)
+                image.save(os.path.join(output_dir, 'samples', f"{str(ii).zfill(4)}.png"))
+            grid_image.save(os.path.join(output_dir,  'grid.png'))

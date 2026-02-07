@@ -71,7 +71,7 @@ logger = get_logger(__name__, log_level="INFO")
 DATASET_NAME_MAPPING = {
     "yuvalkirstain/pickapic_v1": ("jpg_0", "jpg_1", "label_0", "caption"),
     "yuvalkirstain/pickapic_v2": ("jpg_0", "jpg_1", "label_0", "caption"),
-    "/mnt/cogview_dev/liyang/from_wulan/data/pick2pic_v2/pick2pic_v2_train/images/metadata.jsonl": ("jpg_0", "jpg_1", "label_0", "caption"),
+    "dataset/metadata.jsonl": ("jpg_0", "jpg_1", "label_0", "caption"),
 }
 
         
