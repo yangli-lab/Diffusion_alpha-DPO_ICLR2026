@@ -50,11 +50,42 @@ To start training with your configured settings, run the provided training scrip
 
 ```bash
 #!/bin/bash
-python train.py \
-  --config configs/alpha_dpo_config.yaml \
-  --output_dir ./outputs \
-  --gradient_accumulation_steps 4 \
-  --mixed_precision fp16
+export MODEL_NAME="Model_Name"
+export VAE="sdxl-vae-fp16-fix"
+export DATASET=/path/to/dataset
+export IP_ADDR=127.0.0.1
+export PORT_ADDR=7890
+
+noise_portion=0.3
+
+SEED=2025
+CHECKPOINT=/path/to/checkpoint
+
+accelerate launch \
+  --config_file ./launchers/config.yaml \
+  --main_process_ip $IP_ADDR \
+  --main_process_port $PORT_ADDR \
+  --num_machines 1 \
+  --machine_rank 0 \
+  --num_processes 8 \
+  /scripts/main.py \
+  --pretrained_model_name_or_path=$MODEL_NAME \
+  --pretrained_vae_model_name_or_path=$VAE \
+  --dataset_name=${DATASET}/metadata.jsonl \
+  --train_data_dir=${DATASET} \
+  --train_batch_size=4 \
+  --dataloader_num_workers=16 \
+  --gradient_accumulation_steps=64 \
+  --max_train_steps=600 \
+  --lr_scheduler="constant_with_warmup" --lr_warmup_steps=200 \
+  --learning_rate=8.192e-9 --scale_lr \
+  --checkpointing_steps 200 \
+  --beta_dpo 4000 \
+  --alpha_dpo 0.9999 \
+  --sdxl \
+  --reweight_step -1 \
+  --output_dir=${CHECKPOINT}/checkpoint_savedir \
+  --seed ${SEED} 2>&1 | tee logs/dpo_official/training.log
 ```
 
 ## 🔍 Inference
@@ -63,11 +94,11 @@ After training, you can generate samples using the inference script:
 
 ```bash
 #!/bin/bash
-python inference.py \
-  --model_path ./outputs/final_model \
-  --prompt "A photorealistic cat sitting on a windowsill" \
-  --num_samples 4 \
-  --output_dir ./results
+export CUDA_VISIBLE_DEVICES=1,2,3,4
+DATASET=${1:-"pick2pic_v2_test_100"}
+export MASTER_PORT=29501
+
+torchrun --nproc_per_node=4 --master_port=$MASTER_PORT ./scripts/inference.py $DATASET
 ```
 
 ## 📚 Dependencies
@@ -80,8 +111,8 @@ This project builds upon the following open-source repository:
 If you find this work useful in your research, please consider citing our paper:
 ```bibtex
 @article{author2025alpha,
-  title={Alpha-DPO: Diffusion},
-  author={Your Name and Co-authors},
+  title={α-DPO: Robust Preference Alignment for Diffusion Models via α Divergence},
+  author={Yang Li, Songlin Yang, Wei Wang, Xiaoxuan Han, Jing Dong},
   journal={arXiv preprint arXiv:XXXX.XXXXX},
   year={2025}
 }
